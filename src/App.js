@@ -1,11 +1,11 @@
+import Header from './components/Header/Header';
 import logo from './logo.svg';
-import './App.scss';
 
 const App = () => {
 
   return (
     <div className="app-container">
-      Hello world
+      <Header />
     </div>
   );
 }
