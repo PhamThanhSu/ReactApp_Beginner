@@ -50,6 +50,9 @@ body {
         }
       }
     }
+    .main-container{
+      margin-top: 5%;
+    }
     .homepage-container{  
       display: flex;
       .homepage-content{
@@ -84,7 +87,6 @@ body {
 
   video{
     display: block;
-    margin-top: 100px;
     z-index: 1; // Video nằm phía sau header
     width: 45%; // Giữ nguyên kích thước thật của video
     height: auto; // Đảm bảo giữ tỷ lệ video
