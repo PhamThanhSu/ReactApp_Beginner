@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { FiUpload } from "react-icons/fi";
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
 
 const ModalCreateUser = (props) => {
     const { show, setShow } = props;
@@ -31,8 +32,26 @@ const ModalCreateUser = (props) => {
         }
     }
 
+    const validateEmail = (email) => {
+        return String(email)
+          .toLowerCase()
+          .match(
+            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          );
+      };
+
     const handleSubmitCreateUser = async() => {
         //validate
+        const isValidatEmail = validateEmail(email);
+        if(!isValidatEmail){
+            toast.error('Invalid email')
+            return;
+        }
+        if(!password){
+            toast.error('Invalid password')
+            return;
+        }
+        //submit data
         //call apis
         // let data = {
         //     email: email,
@@ -50,7 +69,14 @@ const ModalCreateUser = (props) => {
         data.append('userImage', image);
 
         let res = await axios.post('http://localhost:8081/api/v1/participant', data);
-        console.log(res);
+        
+        console.log(res.data);
+        if(res.data && !res.data.EC){
+            toast.success('Tạo mới User thành công');
+            handleClose();
+        } else if(res.data && res.data.EC){
+            toast.error('email đã tồn tại');
+        }
     }
 
     return (
