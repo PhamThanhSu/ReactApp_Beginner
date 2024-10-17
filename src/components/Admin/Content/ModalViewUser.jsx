@@ -1,83 +1,45 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
-import { FiUpload } from "react-icons/fi";
-import { ToastContainer, toast } from 'react-toastify';
-import { postCreateNewUser } from '../../../Services/apiService';
+import _, { update } from 'lodash';
 
-const ModalCreateUser = (props) => {
-    const { show, setShow  } = props;
+const ModalViewUser = (props) => {
+    const { show, setShow, dataView } = props;
+
     const handleClose = () => {
         setShow(false);
         setEmail("");
         setPassword("");
         setUsername("");
-        setRole("USER");
+        setRole("");
         setImage("");
         setPreviewImage("");
+        props.resetUpdateData();
     };
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [username, setUsername] = useState("");
     const [role, setRole] = useState("USER");
-    const [image, setImage] = useState("");
+    const [image, setImage] = useState(null);
     const [previewImage, setPreviewImage] = useState("");
 
-    const handleUploadImage = (event) => {
-        if(event.target && event.target.files && event.target.files[0]){
-            setPreviewImage(URL.createObjectURL(event.target.files[0]));
-            setImage(event.target.files[0]);
+    useEffect(() => {
+        if(!_.isEmpty(dataView)){
+            //Load thông tin lên form mỗi khi bấm xem
+            setEmail(dataView.email);
+            setUsername(dataView.username);
+            setRole(dataView.role);
+            setImage(dataView.image);
+            setPreviewImage(`data:image/jpeg;base64,${dataView.image}`);
         }
-    }
-
-    const validateEmail = (email) => {
-        return String(email)
-          .toLowerCase()
-          .match(
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-          );
-      };
-
-    const handleSubmitCreateUser = async() => {
-
-        //validate
-        const isValidatEmail = validateEmail(email);
-        if(!isValidatEmail){
-            toast.error('Invalid email')
-            return;
-        }
-        if(!password){
-            toast.error('Invalid password')
-            return;
-        }
-        try {
-            // Gọi hàm postCreateNewUser để tạo user mới
-            let data = await postCreateNewUser(email, password, username, role, image);
-            console.log('data', data)
-            if (data && data.EC === 0) {
-                toast.success('Tạo mới User thành công');
-                handleClose(); // Giả sử đây là hàm để đóng modal hoặc reset form
-                await props.fetchListUsers(); //Load lại bảng khi tạo thành công user mới
-            } else if (data && data.EC !== 0) {
-                toast.error('Email đã tồn tại');
-            }
-        } catch (error) {
-            // Xử lý khi có lỗi từ API
-            console.error(error);
-            toast.error('Có lỗi xảy ra, vui lòng thử lại');
-        }
-    }
+    }, [dataView]);
 
     return (
         <>
-            {/* <Button variant="primary" onClick={handleShow}>
-                Launch demo modal
-            </Button> */}
-
             <Modal show={show} onHide={handleClose} size="lg" backdrop="static"  className='modal-add-user'>
                 <Modal.Header closeButton>
-                    <Modal.Title>Add new user</Modal.Title>
+                    <Modal.Title>Update user</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <form className="row g-3">
@@ -100,12 +62,6 @@ const ModalCreateUser = (props) => {
                                 <option value="ADMIN" >ADMIN</option>
                             </select>
                         </div>
-                        <div className="col-md-12">
-                            <label className="form-label label-upload" htmlFor='labelUpload'>
-                                <FiUpload />Upload File Image
-                            </label>
-                            <input type="file" id="labelUpload" hidden onChange={(event) => handleUploadImage(event)}/>
-                        </div>
                         <div className="col-md-12 img-preview" >
                             {previewImage ? 
                                 <img src={previewImage} /> 
@@ -119,13 +75,10 @@ const ModalCreateUser = (props) => {
                     <Button variant="secondary" onClick={handleClose}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={handleSubmitCreateUser}>
-                        Save Changes
-                    </Button>
                 </Modal.Footer>
             </Modal>
         </>
     );
 }
 
-export default ModalCreateUser;
+export default ModalViewUser;
